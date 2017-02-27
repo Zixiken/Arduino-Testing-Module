@@ -20,39 +20,13 @@ typedef struct {
 } timestamp;
 
 volatile unsigned int overflows = 0;  //The number of overflows of timer 4 that have occurred.
-volatile timestamp timestamps[8]; //Only capturing 8 timestamps for this test
+volatile timestamp timestamps[9]; //Only capturing 8 timestamps for this test
 volatile unsigned char i = 0; //index for the timestamp array
 
-//Setup I/O registers, and then flash PB6 with 1.25s period, duty cycle 20%
-//Timers' input capture cannot work on both edges, so I switched to using an external interrupt.
-int main(void) {
-	UCSR0A = 0x2; //U2X enable
-	UBRR0 = 16; //Set baud rate to 115.2K
-	UCSR0B = 0x18; //Enable transmitter and receiver
-
-	DDRB |= 0x40; //Set port B pin 6 as output
-
-	TIMSK4 = 1; //Enable overflow interrupt.
-
-	EICRA = 1; //Any edge on INT0 pin (21) triggers interrupt.
-	EIMSK = 1; //Enable external interrupt 0
-
-	sei(); //Enable global interrupts.
-
-	TCCR4B = 1; //Set clock source to no prescaling
-
-	while(1) {
-		PORTB |= 0x40;
-		_delay_ms(250);
-		PORTB &= 0xBF;
-		_delay_ms(1000);
-	}
-}
-
-//Very basic serial send function
-void send(timestamp t) {
-	char * c = (char *)&t;
-	for(char i = 0; i < 6; i++) {
+//Sends a timestamp on the serial port as a char array
+void send(volatile timestamp * t) {
+	char * c = (char *)t;
+	for(char i = 0; i < sizeof(timestamp); i++) {
 		while(!(UCSR0A & 0x20));
 		UDR0 = *c;
 		c++;
@@ -60,29 +34,54 @@ void send(timestamp t) {
 }
 
 //Function to write the contents of the timestamp array to the serial port.
-//Eventually will have it just send the data instead of parsing a string.
 void sendTimestamps(void) {
-	for(int i = 0; i < 8; i++) send(timestamps[i]);
+	for(char i = 0; i < 8; i++) send(timestamps+i);
 }
 
-//Increment the overflows value whtn they occur.
+//Setup I/O registers, and then flash PB6 with 1.25s period, duty cycle 20%
+int main(void) {
+	UCSR0A = 0x2; //U2X enable
+	UBRR0 = 16; //Set baud rate to 115.2K
+	UCSR0B = 0x18; //Enable transmitter and receiver
+
+	DDRB |= 0x80; //Set port B pin 6 as output
+
+	TIMSK4 = 1; //Enable overflow interrupt.
+
+	EICRA = 1; //Any edge on INT0 pin (21) triggers interrupt.
+	
+	sei(); //Enable global interrupts.
+
+	TCCR4B = 1; //Set clock source to no prescaling
+
+	while(1) {
+		EIMSK |= 1; //Enable INT0. Having this down here removed the extra capture
+		
+		PORTB |= 0x80;
+		_delay_ms(250);
+		PORTB &= 0x7F;
+		_delay_ms(1000);
+		
+		if(i == 8) {
+			EIMSK &= 0xFE; //Apparently this interrupt disable isn't working.
+			i = 0;
+			sendTimestamps();
+		}
+	}
+}
+
+//Increment the overflows value when they occur.
 ISR(TIMER4_OVF_vect) {overflows++;}
 
 /*
- * External interrupt 0 vector. Now (I think) correctly determines the amount of time that passed
- * since the last capture. I changed it to treat the overflows and the timer value together as a
- * 32-bit value, making the time difference easier to calculate. Also will set the other fields of
- * the current timestamp, and if the end of the array has been reached, disables itself and sends
- * the timestamps over the serial port. Otherwise, it increments the index value. That will eventually
- * not happen in this vector, but for now it allows some testing.
+ * External interrupt 0 vector. Sets fields of the current timestamp,
+ * and increments the index value. The absolute time is created with the number
+ * of overflows as the high order bytes, and the current timer value as the lower.
  */
 ISR(INT0_vect) {
 	unsigned int timerValue = TCNT4;
 	timestamps[i].absTime = ((unsigned long)(overflows) << 16) + timerValue;
 	timestamps[i].stateChange = PIND & 1 ? HIGH : LOW;
 	timestamps[i].pinNo = 21;
-	if(i == 7) {
-		EIMSK &= 0xFE;
-		sendTimestamps();
-	} else i++;
+	i++;
 }
