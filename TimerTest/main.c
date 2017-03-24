@@ -19,9 +19,8 @@ typedef struct {
 	unsigned long absTime; //Absolute time since the capture was started
 } timestamp;
 
-volatile unsigned int overflows = 0;  //The number of overflows of timer 4 that have occurred.
 volatile timestamp timestamps[9]; //Only capturing 8 timestamps for this test
-volatile unsigned char i = 0; //index for the timestamp array
+volatile unsigned char tsIndex = 0; //index for the timestamp array
 
 //Sends a timestamp on the serial port as a char array
 void send(volatile timestamp * t) {
@@ -45,33 +44,34 @@ int main(void) {
 	UCSR0B = 0x18; //Enable transmitter and receiver
 
 	DDRB |= 0x80; //Set port B pin 6 as output
+	DDRH = 0x8; //Set porg H bit 3 (OC4A) for output
 
-	TIMSK4 = 1; //Enable overflow interrupt.
+	TCCR4A = 0xC2; //Set OC4A to set on match, and half of fast PWM mode
+	TCCR4B = 0x18; //Other half of fast PWM mode
+	OCR4A = 0x7FFF; //Match on half max timer value
+	ICR4 = 0xFFFF; //Timer's top is max value
 
 	EICRA = 1; //Any edge on INT0 pin (21) triggers interrupt.
-	
+	EIMSK |= 1; //Enable INT0
+
 	sei(); //Enable global interrupts.
 
-	TCCR4B = 1; //Set clock source to no prescaling
+	TCCR5B = 0x6; //Clock on falling edge
+	TCCR4B |= 1; //Set clock source to no prescaling
 
 	while(1) {
-		EIMSK |= 1; //Enable INT0. Having this down here removed the extra capture
-		
 		PORTB |= 0x80;
 		_delay_ms(250);
 		PORTB &= 0x7F;
 		_delay_ms(1000);
-		
-		if(i == 8) {
+
+		if(tsIndex >= 8) {
 			EIMSK &= 0xFE; //Apparently this interrupt disable isn't working.
-			i = 0;
+			tsIndex = 0;
 			sendTimestamps();
 		}
 	}
 }
-
-//Increment the overflows value when they occur.
-ISR(TIMER4_OVF_vect) {overflows++;}
 
 /*
  * External interrupt 0 vector. Sets fields of the current timestamp,
@@ -79,9 +79,9 @@ ISR(TIMER4_OVF_vect) {overflows++;}
  * of overflows as the high order bytes, and the current timer value as the lower.
  */
 ISR(INT0_vect) {
-	unsigned int timerValue = TCNT4;
-	timestamps[i].absTime = ((unsigned long)(overflows) << 16) + timerValue;
-	timestamps[i].stateChange = PIND & 1 ? HIGH : LOW;
-	timestamps[i].pinNo = 21;
-	i++;
+	unsigned int timerValue4 = TCNT4, timerValue5 = TCNT5;
+	timestamps[tsIndex].absTime = ((unsigned long)(timerValue5) << 16) + timerValue4;
+	timestamps[tsIndex].stateChange = PIND & 1 ? HIGH : LOW;
+	timestamps[tsIndex].pinNo = 21;
+	tsIndex++;
 }
