@@ -1,0 +1,8 @@
+#! /bin/bash
+if [[ $# -ne 1 ]]; then
+  echo "./makeLss <input file> (no extension)"
+  exit
+fi
+~/.platformio/packages/toolchain-atmelavr/bin/avr-gcc -std=gnu11 -fno-fat-lto-objects -g -Os -Wall -ffunction-sections -fdata-sections -flto -mmcu=atmega2560 -DF_CPU=16000000L -DPLATFORMIO=30300 -DARDUINO_ARCH_AVR -DARDUINO_AVR_MEGA2560 -DARDUINO=10617 -I~/.platformio/packages/framework-arduinoavr/cores/arduino -I~/.platformio/packages/framework-arduinoavr/variants/mega -I. "$1.c" -o "$1temp.elf"
+~/.platformio/packages/toolchain-atmelavr/bin/avr-objdump -Sd "$1temp.elf" > "$1.lss"
+rm -f "$1temp.elf"
