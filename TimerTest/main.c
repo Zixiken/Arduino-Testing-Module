@@ -7,15 +7,11 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <stdio.h>
 #include <util/delay.h>
-
-#define HIGH 1
-#define LOW 0
 
 typedef struct {
 	unsigned char stateChange; //The detected state
-	unsigned char pinNo; //The pin the change occurred on (always 21 in this case)
+	unsigned char pinNo; //The pin the change occurred on
 	unsigned long absTime; //Absolute time since the capture was started
 } timestamp;
 
@@ -43,45 +39,33 @@ int main(void) {
 	UBRR0 = 16; //Set baud rate to 115.2K
 	UCSR0B = 0x18; //Enable transmitter and receiver
 
-	DDRB |= 0x80; //Set port B pin 6 as output
-	DDRH = 0x8; //Set porg H bit 3 (OC4A) for output
+	DDRB |= 0x40; //Set port B pin 6 as output
+	DDRH = 0x8; //Set port H bit 3 (OC4A) for output
 
 	TCCR4A = 0xC2; //Set OC4A to set on match, and half of fast PWM mode
 	TCCR4B = 0x18; //Other half of fast PWM mode
 	OCR4A = 0x7FFF; //Match on half max timer value
 	ICR4 = 0xFFFF; //Timer's top is max value
 
-	EICRA = 1; //Any edge on INT0 pin (21) triggers interrupt.
-	EIMSK |= 1; //Enable INT0
+	EICRA = 0x10; //Any edge on INT2 pin (19) triggers interrupt.
+	EIMSK |= 4; //Enable INT2
+	EIFR = 0;
 
 	sei(); //Enable global interrupts.
 
 	TCCR5B = 0x6; //Clock on falling edge
 	TCCR4B |= 1; //Set clock source to no prescaling
-
+	_delay_ms(30);
 	while(1) {
-		PORTB |= 0x80;
-		_delay_ms(250);
-		PORTB &= 0x7F;
+		PORTB |= 0x40;
+		_delay_ms(1);
+		PORTB &= 0xBF;
 		_delay_ms(1000);
 
 		if(tsIndex >= 8) {
-			EIMSK &= 0xFE; //Apparently this interrupt disable isn't working.
+			EIMSK &= 0xFB;
 			tsIndex = 0;
 			sendTimestamps();
 		}
 	}
-}
-
-/*
- * External interrupt 0 vector. Sets fields of the current timestamp,
- * and increments the index value. The absolute time is created with the number
- * of overflows as the high order bytes, and the current timer value as the lower.
- */
-ISR(INT0_vect) {
-	unsigned int timerValue4 = TCNT4, timerValue5 = TCNT5;
-	timestamps[tsIndex].absTime = ((unsigned long)(timerValue5) << 16) + timerValue4;
-	timestamps[tsIndex].stateChange = PIND & 1 ? HIGH : LOW;
-	timestamps[tsIndex].pinNo = 21;
-	tsIndex++;
 }
