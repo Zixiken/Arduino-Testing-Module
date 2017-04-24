@@ -6,7 +6,7 @@ absTime = [];
 
 with serial.Serial() as ser:
     ser.port = 'COM3'
-    ser.baudrate = 115200
+    ser.baudrate = 1000000
     ser.open()
     for i in range(8):
         state.append(int.from_bytes(ser.read(1), byteorder='little', signed=False))

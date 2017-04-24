@@ -17,189 +17,157 @@
 .global __vector_6
 
 __vector_3:
-	push r22
-	push r23
-	lds r22, TCNT4L
-	lds r23, TCNT4H
-	push r24
-	push r25
-	lds r24, TCNT5L
-	lds r25, TCNT5H
-	push r20
-	in r20, 0x3f
 	push r20
 	in r20, 0x09 //in PIND
-	andi r20, 4 //bit 2
 	push r21
-	push r30
-	push r31
-	lds r30, tsIndex
-	mov r21, r30
+	in r21, 0x3f
+	push r21
+	andi r20, 0x04 //bit 2
+	push r26
+	push r27
+	lds r26, tsIndex
+	mov r21, r26
 	add r21, r21
-	add r21, r30
+	add r21, r26
 	add r21, r21
-	inc r30
-	sts tsIndex, r30
-	ldi r30, lo8(timestamps)
-	ldi r31, hi8(timestamps)
-	add r30, r21
-	adc r31, r1
-	st Z+, r20
+	inc r26
+	sts tsIndex, r26
+	ldi r26, lo8(timestamps)
+	ldi r27, hi8(timestamps)
+	add r26, r21
+	adc r27, r1
+	st X+, r20
 	ldi r21, 19 //pin 19 on arduino board
-	st Z+, r21
-	st Z+, r22
-	st Z+, r23
-	st Z+, r24
-	st Z, r25
-	pop r31
-	pop r30
+	st X+, r21
+	lds r20, TCNT4L
+	lds r21, TCNT4H
+	st X+, r20
+	st X+, r21
+	lds r20, TCNT5L
+	lds r21, TCNT5H
+	st X+, r20
+	st X, r21
+	pop r27
+	pop r26
+	pop r21
+	out 0x3f, r21
 	pop r21
 	pop r20
-	out 0x3f, r20
-	pop r20
-	pop r25
-	pop r24
-	pop r23
-	pop r22
 	reti
 
 __vector_4:
-	push r22
-	push r23
-	lds r22, TCNT4L
-	lds r23, TCNT4H
-	push r24
-	push r25
-	lds r24, TCNT5L
-	lds r25, TCNT5H
-	push r20
-	in r20, 0x3f
 	push r20
 	in r20, 0x09 //in PIND
-	andi r20, 8 //bit 3
 	push r21
-	push r30
-	push r31
-	lds r30, tsIndex
-	mov r21, r30
+	in r21, 0x3f
+	push r21
+	andi r20, 0x08 //bit 3
+	push r26
+	push r27
+	lds r26, tsIndex
+	mov r21, r26
 	add r21, r21
-	add r21, r30
+	add r21, r26
 	add r21, r21
-	inc r30
-	sts tsIndex, r30
-	ldi r30, lo8(timestamps)
-	ldi r31, hi8(timestamps)
-	add r30, r21
-	adc r31, r1
-	st Z+, r20
+	inc r26
+	sts tsIndex, r26
+	ldi r26, lo8(timestamps)
+	ldi r27, hi8(timestamps)
+	add r26, r21
+	adc r27, r1
+	st X+, r20
 	ldi r21, 18 //pin 18 on arduino board
-	st Z+, r21
-	st Z+, r22
-	st Z+, r23
-	st Z+, r24
-	st Z, r25
-	pop r31
-	pop r30
+	st X+, r21
+	lds r20, TCNT4L
+	lds r21, TCNT4H
+	st X+, r20
+	st X+, r21
+	lds r20, TCNT5L
+	lds r21, TCNT5H
+	st X+, r20
+	st X, r21
+	pop r27
+	pop r26
+	pop r21
+	out 0x3f, r21
 	pop r21
 	pop r20
-	out 0x3f, r20
-	pop r20
-	pop r25
-	pop r24
-	pop r23
-	pop r22
 	reti
 
 __vector_5:
-	push r22
-	push r23
-	lds r22, TCNT4L
-	lds r23, TCNT4H
-	push r24
-	push r25
-	lds r24, TCNT5L
-	lds r25, TCNT5H
-	push r20
-	in r20, 0x3f
 	push r20
 	in r20, 0x0C //in PINE
-	andi r20, 0x10 //bit 4
 	push r21
-	push r30
-	push r31
-	lds r30, tsIndex
-	mov r21, r30
+	in r21, 0x3f
+	push r21
+	andi r20, 0x10 //bit 4
+	push r26
+	push r27
+	lds r26, tsIndex
+	mov r21, r26
 	add r21, r21
-	add r21, r30
+	add r21, r26
 	add r21, r21
-	inc r30
-	sts tsIndex, r30
-	ldi r30, lo8(timestamps)
-	ldi r31, hi8(timestamps)
-	add r30, r21
-	adc r31, r1
-	st Z+, r20
+	inc r26
+	sts tsIndex, r26
+	ldi r26, lo8(timestamps)
+	ldi r27, hi8(timestamps)
+	add r26, r21
+	adc r27, r1
+	st X+, r20
 	ldi r21, 2 //pin 2 on arduino board
-	st Z+, r21
-	st Z+, r22
-	st Z+, r23
-	st Z+, r24
-	st Z, r25
-	pop r31
-	pop r30
+	st X+, r21
+	lds r20, TCNT4L
+	lds r21, TCNT4H
+	st X+, r20
+	st X+, r21
+	lds r20, TCNT5L
+	lds r21, TCNT5H
+	st X+, r20
+	st X, r21
+	pop r27
+	pop r26
+	pop r21
+	out 0x3f, r21
 	pop r21
 	pop r20
-	out 0x3f, r20
-	pop r20
-	pop r25
-	pop r24
-	pop r23
-	pop r22
 	reti
 
-__vector_6:
-	push r22
-	push r23
-	lds r22, TCNT4L
-	lds r23, TCNT4H
-	push r24
-	push r25
-	lds r24, TCNT5L
-	lds r25, TCNT5H
-	push r20
-	in r20, 0x3f
+__vector_6: //59 cycles
 	push r20
 	in r20, 0x0C //in PINE
-	andi r20, 0x20 //bit 5
 	push r21
-	push r30
-	push r31
-	lds r30, tsIndex
-	mov r21, r30
+	in r21, 0x3f
+	push r21
+	andi r20, 0x20 //bit 5
+	push r26
+	push r27
+	lds r26, tsIndex
+	mov r21, r26
 	add r21, r21
-	add r21, r30
+	add r21, r26
 	add r21, r21
-	inc r30
-	sts tsIndex, r30
-	ldi r30, lo8(timestamps)
-	ldi r31, hi8(timestamps)
-	add r30, r21
-	adc r31, r1
-	st Z+, r20
+	inc r26
+	sts tsIndex, r26
+	ldi r26, lo8(timestamps)
+	ldi r27, hi8(timestamps)
+	add r26, r21
+	adc r27, r1
+	st X+, r20
 	ldi r21, 3 //pin 3 on arduino board
-	st Z+, r21
-	st Z+, r22
-	st Z+, r23
-	st Z+, r24
-	st Z, r25
-	pop r31
-	pop r30
+	st X+, r21
+	lds r20, TCNT4L
+	lds r21, TCNT4H
+	st X+, r20
+	st X+, r21
+	lds r20, TCNT5L
+	lds r21, TCNT5H
+	st X+, r20
+	st X, r21
+	pop r27
+	pop r26
+	pop r21
+	out 0x3f, r21
 	pop r21
 	pop r20
-	out 0x3f, r20
-	pop r20
-	pop r25
-	pop r24
-	pop r23
-	pop r22
 	reti

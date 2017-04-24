@@ -36,7 +36,8 @@ void sendTimestamps(void) {
 //Setup I/O registers, and then flash PB6 with 1.25s period, duty cycle 20%
 int main(void) {
 	UCSR0A = 0x2; //U2X enable
-	UBRR0 = 16; //Set baud rate to 115.2K
+	//UBRR0 = 16; //Set baud rate to 115.2K
+	UBRR0 = 1;
 	UCSR0B = 0x18; //Enable transmitter and receiver
 
 	DDRB |= 0x40; //Set port B pin 6 as output
@@ -51,8 +52,8 @@ int main(void) {
 	EICRA = 0x50; //Any edge on INT2 & INT3 pins (19 & 18) triggers interrupt.
 	EICRB = 0x5; //Any edge on INT4 & INT5 pins (2 & 3) triggers interrupt.
 	EIMSK |= 0x3C; //Enable INT2-5*/
-	EICRB = 4;
-	EIMSK |= 0x20;
+	EICRA = 0x40;
+	EIMSK |= 0x08;
 	EIFR = 0;
 
 	sei(); //Enable global interrupts.
