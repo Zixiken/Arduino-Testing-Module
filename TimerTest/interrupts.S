@@ -9,6 +9,7 @@
  *  Author: Michael
  */
  #include <avr/io.h>
+ #define ARRAY_SIZE 63
 
 .section .text
 .global __vector_3
@@ -25,20 +26,19 @@ __vector_3:
 	andi r20, 0x04 //bit 2
 	push r26
 	push r27
-	lds r26, tsIndex
+	lds r26, int2Write
 	mov r21, r26
 	add r21, r21
 	add r21, r26
 	add r21, r21
 	inc r26
-	sts tsIndex, r26
-	ldi r26, lo8(timestamps)
-	ldi r27, hi8(timestamps)
+	andi r26, ARRAY_SIZE
+	sts int2Write, r26
+	ldi r26, lo8(int2Timestamps)
+	ldi r27, hi8(int2Timestamps)
 	add r26, r21
 	adc r27, r1
 	st X+, r20
-	ldi r21, 19 //pin 19 on arduino board
-	st X+, r21
 	lds r20, TCNT4L
 	lds r21, TCNT4H
 	st X+, r20
@@ -64,20 +64,19 @@ __vector_4:
 	andi r20, 0x08 //bit 3
 	push r26
 	push r27
-	lds r26, tsIndex
+	lds r26, int3Write
 	mov r21, r26
 	add r21, r21
 	add r21, r26
 	add r21, r21
 	inc r26
-	sts tsIndex, r26
-	ldi r26, lo8(timestamps)
-	ldi r27, hi8(timestamps)
+	andi r26, ARRAY_SIZE
+	sts int3Write, r26
+	ldi r26, lo8(int3Timestamps)
+	ldi r27, hi8(int3Timestamps)
 	add r26, r21
 	adc r27, r1
 	st X+, r20
-	ldi r21, 18 //pin 18 on arduino board
-	st X+, r21
 	lds r20, TCNT4L
 	lds r21, TCNT4H
 	st X+, r20
@@ -103,20 +102,19 @@ __vector_5:
 	andi r20, 0x10 //bit 4
 	push r26
 	push r27
-	lds r26, tsIndex
+	lds r26, int4Write
 	mov r21, r26
 	add r21, r21
 	add r21, r26
 	add r21, r21
 	inc r26
-	sts tsIndex, r26
-	ldi r26, lo8(timestamps)
-	ldi r27, hi8(timestamps)
+	andi r26, ARRAY_SIZE
+	sts int4Write, r26
+	ldi r26, lo8(int4Timestamps)
+	ldi r27, hi8(int4Timestamps)
 	add r26, r21
 	adc r27, r1
 	st X+, r20
-	ldi r21, 2 //pin 2 on arduino board
-	st X+, r21
 	lds r20, TCNT4L
 	lds r21, TCNT4H
 	st X+, r20
@@ -133,7 +131,7 @@ __vector_5:
 	pop r20
 	reti
 
-__vector_6: //59 cycles
+__vector_6: //57 cycles
 	push r20
 	in r20, 0x0C //in PINE
 	push r21
@@ -142,20 +140,19 @@ __vector_6: //59 cycles
 	andi r20, 0x20 //bit 5
 	push r26
 	push r27
-	lds r26, tsIndex
+	lds r26, int5Write
 	mov r21, r26
 	add r21, r21
 	add r21, r26
 	add r21, r21
 	inc r26
-	sts tsIndex, r26
-	ldi r26, lo8(timestamps)
-	ldi r27, hi8(timestamps)
+	andi r26, ARRAY_SIZE
+	sts int5Write, r26
+	ldi r26, lo8(int5Timestamps)
+	ldi r27, hi8(int5Timestamps)
 	add r26, r21
 	adc r27, r1
 	st X+, r20
-	ldi r21, 3 //pin 3 on arduino board
-	st X+, r21
 	lds r20, TCNT4L
 	lds r21, TCNT4H
 	st X+, r20
