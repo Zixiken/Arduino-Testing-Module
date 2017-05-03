@@ -24,20 +24,25 @@ __vector_3:
 	in r21, 0x3f
 	push r21
 	andi r20, 0x04 //bit 2
+	push r22
 	push r26
 	push r27
 	lds r26, int2Write
 	mov r21, r26
-	add r21, r21
+	clr r22
+	lsl r21
+	rol r22
+	lsl r21
+	rol r22
 	add r21, r26
-	add r21, r21
+	adc r22, r1
 	inc r26
 	andi r26, ARRAY_SIZE
 	sts int2Write, r26
 	ldi r26, lo8(int2Timestamps)
 	ldi r27, hi8(int2Timestamps)
 	add r26, r21
-	adc r27, r1
+	adc r27, r22
 	st X+, r20
 	lds r20, TCNT4L
 	lds r21, TCNT4H
@@ -49,6 +54,7 @@ __vector_3:
 	st X, r21
 	pop r27
 	pop r26
+	pop r22
 	pop r21
 	out 0x3f, r21
 	pop r21
@@ -62,20 +68,25 @@ __vector_4:
 	in r21, 0x3f
 	push r21
 	andi r20, 0x08 //bit 3
+	push r22
 	push r26
 	push r27
 	lds r26, int3Write
 	mov r21, r26
-	add r21, r21
+	clr r22
+	lsl r21
+	rol r22
+	lsl r21
+	rol r22
 	add r21, r26
-	add r21, r21
+	adc r22, r1
 	inc r26
 	andi r26, ARRAY_SIZE
 	sts int3Write, r26
 	ldi r26, lo8(int3Timestamps)
 	ldi r27, hi8(int3Timestamps)
 	add r26, r21
-	adc r27, r1
+	adc r27, r22
 	st X+, r20
 	lds r20, TCNT4L
 	lds r21, TCNT4H
@@ -87,6 +98,7 @@ __vector_4:
 	st X, r21
 	pop r27
 	pop r26
+	pop r22
 	pop r21
 	out 0x3f, r21
 	pop r21
@@ -100,20 +112,25 @@ __vector_5:
 	in r21, 0x3f
 	push r21
 	andi r20, 0x10 //bit 4
+	push r22
 	push r26
 	push r27
 	lds r26, int4Write
 	mov r21, r26
-	add r21, r21
+	clr r22
+	lsl r21
+	rol r22
+	lsl r21
+	rol r22
 	add r21, r26
-	add r21, r21
+	adc r22, r1
 	inc r26
 	andi r26, ARRAY_SIZE
 	sts int4Write, r26
 	ldi r26, lo8(int4Timestamps)
 	ldi r27, hi8(int4Timestamps)
 	add r26, r21
-	adc r27, r1
+	adc r27, r22
 	st X+, r20
 	lds r20, TCNT4L
 	lds r21, TCNT4H
@@ -125,6 +142,7 @@ __vector_5:
 	st X, r21
 	pop r27
 	pop r26
+	pop r22
 	pop r21
 	out 0x3f, r21
 	pop r21
@@ -138,20 +156,25 @@ __vector_6: //57 cycles
 	in r21, 0x3f
 	push r21
 	andi r20, 0x20 //bit 5
+	push r22
 	push r26
 	push r27
 	lds r26, int5Write
 	mov r21, r26
-	add r21, r21
+	clr r22
+	lsl r21
+	rol r22
+	lsl r21
+	rol r22
 	add r21, r26
-	add r21, r21
+	adc r22, r1
 	inc r26
 	andi r26, ARRAY_SIZE
 	sts int5Write, r26
 	ldi r26, lo8(int5Timestamps)
 	ldi r27, hi8(int5Timestamps)
 	add r26, r21
-	adc r27, r1
+	adc r27, r22
 	st X+, r20
 	lds r20, TCNT4L
 	lds r21, TCNT4H
@@ -163,6 +186,7 @@ __vector_6: //57 cycles
 	st X, r21
 	pop r27
 	pop r26
+	pop r22
 	pop r21
 	out 0x3f, r21
 	pop r21
