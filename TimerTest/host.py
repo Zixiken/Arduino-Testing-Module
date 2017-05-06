@@ -8,22 +8,20 @@ def sendCommands():
     senseCommandB = 0
     maskCommand = 0
 
-    global int2State
-    global int3State
-    global int4State
-    global int5State
-    global int2AbsTime
-    global int3AbsTime
-    global int4AbsTime
-    global int5AbsTime
-    int2State = []
-    int3State = []
-    int4State = []
-    int5State = []
-    int2AbsTime = []
-    int3AbsTime = []
-    int4AbsTime = []
-    int5AbsTime = []
+    global int2Stamps
+    global int3Stamps
+    global int4Stamps
+    global int5Stamps
+    global numCaptures
+    int2Stamps = []
+    int3Stamps = []
+    int4Stamps = []
+    int5Stamps = []
+    numCaptures = 0
+
+    text.config(state=NORMAL)
+    text.delete(1.0, END)
+    text.config(state=DISABLED)
 
     if not ser.isOpen() and not serialConnect(port.get()): return
     
@@ -53,38 +51,72 @@ def sendCommands():
     ser.write(senseCommandA.to_bytes(1, byteorder='little', signed=False))
     ser.write(senseCommandB.to_bytes(1, byteorder='little', signed=False))
     ser.write(maskCommand.to_bytes(1, byteorder='little', signed=False))
+    
+    if burstMode.get(): threading.Thread(target=burstLoop).start()
+
+def burstLoop():
+    startTime = time.mktime(time.localtime())
+    while numCaptures < 50 and time.mktime(time.localtime())-startTime < 10:
+        continue
+    sendStop()
+    text.config(state=NORMAL)
+    if len(int2Stamps) >= 1: dumpStamps(int2Stamps, 0)
+    if len(int3Stamps) >= 1: dumpStamps(int3Stamps, 1)
+    if len(int4Stamps) >= 1: dumpStamps(int4Stamps, 2)
+    if len(int5Stamps) >= 1: dumpStamps(int5Stamps, 3)
+    text.config(state=DISABLED)
+    text.see(END)
+
+def dumpStamps(stamps, pin):
+    text.insert(END, '{:d}, {:d}, first capture\n'
+        .format(stamps[0][0], pin));
+    prevTime = stamps[0][1]
+    for i in range(1, len(stamps)-1):
+        curState = stamps[i][0]
+        curTime = stamps[i][1]
+        difference = curTime-prevTime;
+        text.insert(END, '{:d}, {:d}, {:f} seconds    (raw {:d})\n'
+            .format(curState, pin, float(difference)/16000000, difference));
+        prevTime = curTime
+
+def sendStop():
+    if ser.isOpen(): ser.write(b'\x00')
 
 def serialReadLoop():
+    global numCaptures
     while(loop):
-        newState = int.from_bytes(ser.read(1), byteorder='little', signed=False)
-        newTime = int.from_bytes(ser.read(4), byteorder='little', signed=False)
-        newPin = int.from_bytes(ser.read(1), byteorder='little', signed=False)
+        timeStamp = ser.read(5)
+        statePinByte = timeStamp[0]
+        newTime = int.from_bytes(timeStamp[1:4], byteorder='little', signed=False)
+        newPin = statePinByte & 0x03
+        newState = statePinByte & 0xFC
 
-        if(newPin == 19):
-            state = int2State
-            absTime = int2AbsTime
-        elif(newPin == 18):
-            state = int3State
-            absTime = int3AbsTime
-        elif(newPin == 2):
-            state = int4State
-            absTime = int4AbsTime
-        else:
-            state = int5State
-            absTime = int5AbsTime
-        state.append(newState)
-        absTime.append(newTime)
+        if newState != 0 and\
+           newState != 4 and\
+           newState != 8 and\
+           newState != 16 and\
+           newState != 32:
+            ser.reset_input_buffer()
+            continue
 
-        text.config(state=NORMAL)
-        if(len(state) == 1):
-            text.insert(END, '{:d}, {:d}, first capture\n'
-                .format(newState, newPin));
+        if newPin == 0: stamps = int2Stamps
+        elif newPin == 1: stamps = int3Stamps
+        elif newPin == 2: stamps = int4Stamps
+        else: stamps = int5Stamps
+        stamps.append((newState, newTime))
+
+        if burstMode.get(): numCaptures += 1
         else:
-            difference = newTime-absTime[-2];
-            text.insert(END, '{:d}, {:d}, {:f} seconds    (raw {:d})\n'
-                .format(newState, newPin, float(difference)/16000000, difference));
-        text.config(state=DISABLED)
-        text.see(END)
+            text.config(state=NORMAL)
+            if(len(stamps) == 1):
+                text.insert(END, '{:d}, {:d}, first capture\n'
+                    .format(newState, newPin));
+            else:
+                difference = newTime-stamps[-2][1];
+                text.insert(END, '{:d}, {:d}, {:f} seconds    (raw {:d})\n'
+                    .format(newState, newPin, float(difference)/16000000, difference));
+            text.config(state=DISABLED)
+            text.see(END)
 
 def serialConnect(port):
     ser.port = port
@@ -111,15 +143,13 @@ chan2 = BooleanVar()
 chan3 = BooleanVar()
 chan18 = BooleanVar()
 chan19 = BooleanVar()
+burstMode = BooleanVar()
 
-int2State = []
-int3State = []
-int4State = []
-int5State = []
-int2AbsTime = []
-int3AbsTime = []
-int4AbsTime = []
-int5AbsTime = []
+int2Stamps = []
+int3Stamps = []
+int4Stamps = []
+int5Stamps = []
+numCaptures = 0
 
 ser = serial.Serial()
 loop = True
@@ -160,7 +190,15 @@ OptionMenu(f, captEdge19, *options).pack(side=LEFT)
 Label(f, text="on channel 19").pack(side=LEFT)
 f.pack()
 
-Button(root, text="Go!", command=sendCommands).pack()
+f = Frame(root)
+Checkbutton(f, variable=burstMode).pack(side=LEFT)
+Label(f, text="Burst Mode").pack(side=LEFT)
+f.pack()
+
+f = Frame(root)
+Button(f, text="Go!", command=sendCommands).pack(side=LEFT)
+Button(f, text="Stop", command=sendStop).pack(side=LEFT)
+f.pack()
 
 f = Frame(root)
 text = Text(f, state=DISABLED)

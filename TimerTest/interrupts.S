@@ -4,12 +4,14 @@
  * External interrupt vectors. Sets fields of the current timestamp,
  * and increments the index value. The absolute time is created with the number
  * of overflows as the high order bytes, and the current timer value as the lower.
+ * These take a total of 71 cycles to complete, including 5 cycles to enter the
+ * vector table and an rjmp to one of these vectors. This is 4.4375 us.
  *
  * Created: 4/6/2017 2:22:16 PM
  *  Author: Michael
  */
  #include <avr/io.h>
- #define ARRAY_SIZE 63
+ #define ARRAY_SIZE 255
 
 .section .text
 .global __vector_3
@@ -149,7 +151,7 @@ __vector_5:
 	pop r20
 	reti
 
-__vector_6: //57 cycles
+__vector_6:
 	push r20
 	in r20, 0x0C //in PINE
 	push r21
