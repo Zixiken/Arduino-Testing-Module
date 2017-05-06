@@ -56,7 +56,7 @@ def sendCommands():
 
 def burstLoop():
     startTime = time.mktime(time.localtime())
-    while numCaptures < 50 and time.mktime(time.localtime())-startTime < 10:
+    while numCaptures < 50 and time.mktime(time.localtime())-startTime < 5:
         continue
     sendStop()
     text.config(state=NORMAL)
@@ -96,7 +96,7 @@ def serialReadLoop():
            newState != 8 and\
            newState != 16 and\
            newState != 32:
-            ser.reset_input_buffer()
+            ser.read(4)
             continue
 
         if newPin == 0: stamps = int2Stamps

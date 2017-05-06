@@ -4,14 +4,13 @@
  * External interrupt vectors. Sets fields of the current timestamp,
  * and increments the index value. The absolute time is created with the number
  * of overflows as the high order bytes, and the current timer value as the lower.
- * These take a total of 71 cycles to complete, including 5 cycles to enter the
- * vector table and an rjmp to one of these vectors. This is 4.4375 us.
+ * These take a total of 76 cycles to complete, including 5 cycles to enter the
+ * vector table and an rjmp to one of these vectors. This is 4.75 us.
  *
  * Created: 4/6/2017 2:22:16 PM
  *  Author: Michael
  */
  #include <avr/io.h>
- #define ARRAY_SIZE 255
 
 .section .text
 .global __vector_3
@@ -30,6 +29,7 @@ __vector_3:
 	push r26
 	push r27
 	lds r26, int2Write
+	lds r27, int2Read
 	mov r21, r26
 	clr r22
 	lsl r21
@@ -39,8 +39,10 @@ __vector_3:
 	add r21, r26
 	adc r22, r1
 	inc r26
-	andi r26, ARRAY_SIZE
-	sts int2Write, r26
+	cp r26, r27
+	brne 1f
+	cbi 0x1D, 2
+1:	sts int2Write, r26
 	ldi r26, lo8(int2Timestamps)
 	ldi r27, hi8(int2Timestamps)
 	add r26, r21
@@ -74,6 +76,7 @@ __vector_4:
 	push r26
 	push r27
 	lds r26, int3Write
+	lds r27, int3Read
 	mov r21, r26
 	clr r22
 	lsl r21
@@ -83,8 +86,10 @@ __vector_4:
 	add r21, r26
 	adc r22, r1
 	inc r26
-	andi r26, ARRAY_SIZE
-	sts int3Write, r26
+	cp r26, r27
+	brne 1f
+	cbi 0x1D, 3
+1:	sts int3Write, r26
 	ldi r26, lo8(int3Timestamps)
 	ldi r27, hi8(int3Timestamps)
 	add r26, r21
@@ -118,6 +123,7 @@ __vector_5:
 	push r26
 	push r27
 	lds r26, int4Write
+	lds r27, int4Read
 	mov r21, r26
 	clr r22
 	lsl r21
@@ -127,8 +133,10 @@ __vector_5:
 	add r21, r26
 	adc r22, r1
 	inc r26
-	andi r26, ARRAY_SIZE
-	sts int4Write, r26
+	cp r26, r27
+	brne 1f
+	cbi 0x1D, 4
+1:	sts int4Write, r26
 	ldi r26, lo8(int4Timestamps)
 	ldi r27, hi8(int4Timestamps)
 	add r26, r21
@@ -162,6 +170,7 @@ __vector_6:
 	push r26
 	push r27
 	lds r26, int5Write
+	lds r27, int5Read
 	mov r21, r26
 	clr r22
 	lsl r21
@@ -171,8 +180,10 @@ __vector_6:
 	add r21, r26
 	adc r22, r1
 	inc r26
-	andi r26, ARRAY_SIZE
-	sts int5Write, r26
+	cp r26, r27
+	brne 1f
+	cbi 0x1D, 5
+1:	sts int5Write, r26
 	ldi r26, lo8(int5Timestamps)
 	ldi r27, hi8(int5Timestamps)
 	add r26, r21

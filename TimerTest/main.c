@@ -10,28 +10,26 @@
 #include <util/delay.h>
 #include <util/twi.h>
 
-#define ARRAY_SIZE 256
-
 typedef struct {
 	unsigned char stateChange; //The detected state
 	unsigned long absTime; //Absolute time since the capture was started
 } timestamp;
 
 //Timestamp arrays
-volatile timestamp int2Timestamps[ARRAY_SIZE];
-volatile timestamp int3Timestamps[ARRAY_SIZE];
-volatile timestamp int4Timestamps[ARRAY_SIZE];
-volatile timestamp int5Timestamps[ARRAY_SIZE];
+volatile timestamp int2Timestamps[256];
+volatile timestamp int3Timestamps[256];
+volatile timestamp int4Timestamps[256];
+volatile timestamp int5Timestamps[256];
 //Next write index for the timestamp arrays
 volatile unsigned char int2Write = 0;
 volatile unsigned char int3Write = 0;
 volatile unsigned char int4Write = 0;
 volatile unsigned char int5Write = 0;
 //Next read index for the timestamp arrays
-unsigned char int2Read = 0;
-unsigned char int3Read = 0;
-unsigned char int4Read = 0;
-unsigned char int5Read = 0;
+volatile unsigned char int2Read = 0;
+volatile unsigned char int3Read = 0;
+volatile unsigned char int4Read = 0;
+volatile unsigned char int5Read = 0;
 
 //Sends a timestamp on the serial port as a char array
 //Send pin number and detected state in the same byte
@@ -83,19 +81,19 @@ int main(void) {
 		//pin values 0, 1, 2, 3 are interrupts 2, 3, 4, 5
 		while(int2Read != int2Write) {
 			send(int2Timestamps+int2Read, 0);
-			int2Read = (int2Read+1) % ARRAY_SIZE;
+			int2Read++;
 		}
 		while(int3Read != int3Write) {
 			send(int3Timestamps+int3Read, 1);
-			int3Read = (int3Read+1) % ARRAY_SIZE;
+			int3Read++;
 		}
 		while(int4Read != int4Write) {
 			send(int4Timestamps+int4Read, 2);
-			int4Read = (int4Read+1) % ARRAY_SIZE;
+			int4Read++;
 		}
 		while(int5Read != int5Write) {
 			send(int5Timestamps+int5Read, 3);
-			int5Read = (int5Read+1) % ARRAY_SIZE;
+			int5Read++;
 		}
 	}
 }
