@@ -43,13 +43,28 @@ def sendCommands():
     elif selection == options[1]: senseCommandA |= 0x20
     else: senseCommandA |= 0x10
 
-    if chan2.get(): maskCommand |= 0x10
-    if chan3.get(): maskCommand |= 0x20
-    if chan18.get(): maskCommand |= 0x8
-    if chan19.get(): maskCommand |= 0x4
+    if chan2.get():
+        maskCommand |= 0x10
+        ser.write(b'\x05')
+        ser.write(chan2NumCaptures.get().to_bytes(1, byteorder='little', signed=False))
+    if chan3.get():
+        maskCommand |= 0x20
+        ser.write(b'\x06')
+        ser.write(chan3NumCaptures.get().to_bytes(1, byteorder='little', signed=False))
+    if chan18.get():
+        maskCommand |= 0x8
+        ser.write(b'\x04')
+        ser.write(chan18NumCaptures.get().to_bytes(1, byteorder='little', signed=False))
+    if chan19.get():
+        maskCommand |= 0x4
+        ser.write(b'\x03')
+        ser.write(chan19NumCaptures.get().to_bytes(1, byteorder='little', signed=False))
 
+    ser.write(b'\x00')
     ser.write(senseCommandA.to_bytes(1, byteorder='little', signed=False))
+    ser.write(b'\x01')
     ser.write(senseCommandB.to_bytes(1, byteorder='little', signed=False))
+    ser.write(b'\x02')
     ser.write(maskCommand.to_bytes(1, byteorder='little', signed=False))
     
     if burstMode.get(): threading.Thread(target=burstLoop).start()
@@ -80,7 +95,9 @@ def dumpStamps(stamps, pin):
         prevTime = curTime
 
 def sendStop():
-    if ser.isOpen(): ser.write(b'\x00')
+    if ser.isOpen():
+        ser.write(b'\x02')
+        ser.write(b'\x00')
 
 def serialReadLoop():
     global numCaptures
@@ -166,28 +183,40 @@ f = Frame(root)
 Checkbutton(f, variable=chan2).pack(side=LEFT)
 Label(f, text="Capture ").pack(side=LEFT)
 OptionMenu(f, captEdge2, *options).pack(side=LEFT)
-Label(f, text="on channel 2").pack(side=LEFT)
+Label(f, text="on channel 2, ").pack(side=LEFT)
+chan2NumCaptures = Scale(f, orient=HORIZONTAL, from_=0, to=255)
+chan2NumCaptures.pack(side=LEFT)
+Label(f, text="Captures").pack(side=LEFT)
 f.pack()
 
 f = Frame(root)
 Checkbutton(f, variable=chan3).pack(side=LEFT)
 Label(f, text="Capture ").pack(side=LEFT)
 OptionMenu(f, captEdge3, *options).pack(side=LEFT)
-Label(f, text="on channel 3").pack(side=LEFT)
+Label(f, text="on channel 3, ").pack(side=LEFT)
+chan3NumCaptures = Scale(f, orient=HORIZONTAL, from_=0, to=255)
+chan3NumCaptures.pack(side=LEFT)
+Label(f, text="Captures").pack(side=LEFT)
 f.pack()
 
 f = Frame(root)
 Checkbutton(f, variable=chan18).pack(side=LEFT)
 Label(f, text="Capture ").pack(side=LEFT)
 OptionMenu(f, captEdge18, *options).pack(side=LEFT)
-Label(f, text="on channel 18").pack(side=LEFT)
+Label(f, text="on channel 18, ").pack(side=LEFT)
+chan18NumCaptures = Scale(f, orient=HORIZONTAL, from_=0, to=255)
+chan18NumCaptures.pack(side=LEFT)
+Label(f, text="Captures").pack(side=LEFT)
 f.pack()
 
 f = Frame(root)
 Checkbutton(f, variable=chan19).pack(side=LEFT)
 Label(f, text="Capture ").pack(side=LEFT)
 OptionMenu(f, captEdge19, *options).pack(side=LEFT)
-Label(f, text="on channel 19").pack(side=LEFT)
+Label(f, text="on channel 19, ").pack(side=LEFT)
+chan19NumCaptures = Scale(f, orient=HORIZONTAL, from_=0, to=255)
+chan19NumCaptures.pack(side=LEFT)
+Label(f, text="Captures").pack(side=LEFT)
 f.pack()
 
 f = Frame(root)
