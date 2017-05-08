@@ -40,9 +40,8 @@ __vector_3:
 	adc r22, r1
 	inc r26
 	cp r26, r27
-	brne 1f
-	cbi 0x1D, 2
-1:	sts int2Write, r26
+	breq 1f
+	sts int2Write, r26
 	ldi r26, lo8(int2Timestamps)
 	ldi r27, hi8(int2Timestamps)
 	add r26, r21
@@ -56,7 +55,7 @@ __vector_3:
 	lds r21, TCNT5H
 	st X+, r20
 	st X, r21
-	pop r27
+1:	pop r27
 	pop r26
 	pop r22
 	pop r21
@@ -87,9 +86,8 @@ __vector_4:
 	adc r22, r1
 	inc r26
 	cp r26, r27
-	brne 1f
-	cbi 0x1D, 3
-1:	sts int3Write, r26
+	breq 1f
+	sts int3Write, r26
 	ldi r26, lo8(int3Timestamps)
 	ldi r27, hi8(int3Timestamps)
 	add r26, r21
@@ -103,7 +101,7 @@ __vector_4:
 	lds r21, TCNT5H
 	st X+, r20
 	st X, r21
-	pop r27
+1:	pop r27
 	pop r26
 	pop r22
 	pop r21
@@ -134,9 +132,8 @@ __vector_5:
 	adc r22, r1
 	inc r26
 	cp r26, r27
-	brne 1f
-	cbi 0x1D, 4
-1:	sts int4Write, r26
+	breq 1f
+	sts int4Write, r26
 	ldi r26, lo8(int4Timestamps)
 	ldi r27, hi8(int4Timestamps)
 	add r26, r21
@@ -150,7 +147,7 @@ __vector_5:
 	lds r21, TCNT5H
 	st X+, r20
 	st X, r21
-	pop r27
+1:	pop r27
 	pop r26
 	pop r22
 	pop r21
@@ -181,9 +178,8 @@ __vector_6:
 	adc r22, r1
 	inc r26
 	cp r26, r27
-	brne 1f
-	cbi 0x1D, 5
-1:	sts int5Write, r26
+	breq 1f
+	sts int5Write, r26
 	ldi r26, lo8(int5Timestamps)
 	ldi r27, hi8(int5Timestamps)
 	add r26, r21
@@ -197,7 +193,7 @@ __vector_6:
 	lds r21, TCNT5H
 	st X+, r20
 	st X, r21
-	pop r27
+1:	pop r27
 	pop r26
 	pop r22
 	pop r21

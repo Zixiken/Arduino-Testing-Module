@@ -129,7 +129,7 @@ def serialReadLoop():
                 text.insert(END, '{:d}, {:d}, first capture\n'
                     .format(newState, newPin));
             else:
-                difference = newTime-stamps[-2][1];
+                difference = abs(newTime-stamps[-2][1]);
                 text.insert(END, '{:d}, {:d}, {:f} seconds    (raw {:d})\n'
                     .format(newState, newPin, float(difference)/16000000, difference));
             text.config(state=DISABLED)

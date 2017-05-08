@@ -135,12 +135,12 @@ int main(void) {
 	PORTE = 8; //Turn on initially
 	TCCR3A = 0x82; //Fast PWM mode, clear oca on match
 	TCCR3B = 0x18;
-	//ICR3 = 31250; //500ms period
-	//OCR3A = 15625; //250ms match time
+	//ICR3 = 18749; //300ms period
+	//OCR3A = 6249; //100ms match time
 	//TCCR3B |= 4; //256 prescalar
-	ICR3 = 159;
-	OCR3A = 79;
-	TCCR3B |= 1;
+	ICR3 = 15999; //1ms period
+	OCR3A = 3999; //250us match time
+	TCCR3B |= 1; //no prescalar
 
 	sei(); //Enable global interrupts.
 
